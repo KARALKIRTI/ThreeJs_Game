@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Hidden Object Game</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="css/style.css" rel="stylesheet" title="no title" />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Helvetica", sans-serif;
+        background: black;
+        color: white;
+      }
+
+      #initial-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url("assets/baackground.png") no-repeat center center/cover;
+        z-index: 1000;
+        text-align: center;
+      }
+
+      #initial-popup h1 {
+        font-size: 2.5rem;
+        color: white;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 20px;
+        border-radius: 10px;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+
+      #instructions-box {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: url("assets/baackground.png") no-repeat center center/cover;
+        z-index: 1000;
+      }
+
+      #instructions-box .box {
+        width: 70%;
+        background: rgba(26, 26, 26, 0.8);
+        padding: 20px;
+        border: 2px solid #444;
+        transform: scaleY(0);
+        transform-origin: top;
+        animation: unfold 1s forwards;
+      }
+
+      #instructions-box .box h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+
+      #instructions-box .box p {
+        font-size: 1.2rem;
+        text-align: left;
+      }
+
+      #instructions-box .box ul {
+        margin-left: 20px;
+        text-align: left;
+        list-style-type: disc;
+      }
+
+      #instructions-box .box button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #008cba;
+        color: white;
+        border: none;
+        font-size: 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      @keyframes unfold {
+        to {
+          transform: scaleY(1);
+        }
+      }
+
+      #container {
+        display: none;
+      }
+
+      #sound-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 100;
+        padding: 10px;
+        font-size: 1.2rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #timer {
+        position: absolute;
+        top: 50px;
+        left: 10px;
+        z-index: 100;
+        font-size: 1.5rem;
+        color: yellow;
+      }
+
+      #time-over-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        z-index: 2000;
+        text-align: center;
+      }
+
+      #time-over-popup h1 {
+        font-size: 3rem;
+        text-shadow: 0 0 10px yellow;
+        animation: fadeInOut 3s infinite;
+      }
+
+      @keyframes fadeInOut {
+        0%, 100% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      #done-message {
+        position: fixed;
+        bottom: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 128, 0, 0.8);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 1.5rem;
+        display: none;
+        animation: slideUp 1s forwards;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translate(-50%, 20%);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, 0%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="initial-popup">
+      <h1>Your Hidden Object Adventure Begins!</h1>
+    </div>
+
+    <div id="instructions-box">
+      <div class="box">
+        <h2>How to Play</h2>
+        <p>Follow these steps to play the game:</p>
+        <ul>
+          <li>Use your <strong>mouse</strong> to move around the scene.</li>
+          <li>Click on objects to identify hidden items.</li>
+          <li>Keep an eye on the <strong>timer</strong> at the top left corner.</li>
+          <li>Find all hidden objects before the timer runs out to win.</li>
+          <li>Use the <strong>🔊 button</strong> at the top right to toggle sound.</li>
+        </ul>
+        <button id="start-game-btn">Start Game</button>
+      </div>
+    </div>
+
+    <div id="time-over-popup">
+      <h1>Time Over! Better Luck Next Time!</h1>
+    </div>
+
+    <div id="done-message">🎉 Done! Great Find! 🎉</div>
+
+    <div id="container"></div>
+    <button id="sound-btn">🔊</button>
+    <div id="timer">Time: 60s</div>
+
+    <audio id="background-audio" loop>
+      <source src="assets/sounds/good-night-261834.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+
+    <script src="js/lib/three.js"></script>
+    <script src="js/lib/virtualjoystick.js"></script>
+    <script src="js/panoram.js"></script>
+    <script src="js/items.js"></script>
+
+    <script>
+      let timer;
+      let timeRemaining = 60; // Initial time limit
+
+      function toggleSound() {
+        const backgroundAudio = document.getElementById("background-audio");
+        const soundBtn = document.getElementById("sound-btn");
+        if (backgroundAudio.paused) {
+          backgroundAudio.play().catch((error) => {
+            console.error("Audio playback failed:", error);
+          });
+          soundBtn.textContent = "🔊";
+        } else {
+          backgroundAudio.pause();
+          soundBtn.textContent = "🔇";
+        }
+      }
+
+      function enableAudioAfterInteraction() {
+        document.body.addEventListener("click", () => {
+          const backgroundAudio = document.getElementById("background-audio");
+          backgroundAudio.volume = 0.5;
+          backgroundAudio.play().catch((error) => {
+            console.error("Audio playback failed:", error);
+          });
+        }, { once: true });
+      }
+
+      function showInstructions() {
+        document.getElementById("initial-popup").style.display = "none";
+        document.getElementById("instructions-box").style.display = "flex";
+      }
+
+      function startTimer() {
+        const timerElement = document.getElementById("timer");
+        timer = setInterval(() => {
+          timeRemaining--;
+          timerElement.textContent = `Time: ${timeRemaining}s`;
+          if (timeRemaining <= 0) {
+            clearInterval(timer);
+            document.getElementById("time-over-popup").style.display = "flex";
+          }
+        }, 1000);
+      }
+
+      function showDoneMessage() {
+        const doneMessage = document.getElementById("done-message");
+        doneMessage.style.display = "block";
+        setTimeout(() => {
+          doneMessage.style.display = "none";
+        }, 2000);
+      }
+
+      function startGame() {
+        document.getElementById("instructions-box").style.display = "none";
+        document.getElementById("container").style.display = "block";
+        enableAudioAfterInteraction();
+        startTimer();
+
+        // Simulate finding an object (for demo purposes)
+        setTimeout(showDoneMessage, 5000); // Example of a "Done" animation
+      }
+
+      window.onload = () => {
+        setTimeout(showInstructions, 3000);
+        document.getElementById("start-game-btn").addEventListener("click", startGame);
+        document.getElementById("sound-btn").addEventListener("click", toggleSound);
+      };
+    </script>
+  </body>
+</html>
